@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdio.h>
+#include "parser.tab.h"
 
 int numero_linhas = 0, numero_caracteres=0;
 
@@ -26,6 +27,8 @@ WHITESPACE [\t\n\r]
 
 ^{INTEGER}$ {
 	printf("You typed a integer: %s\n", yytext);
+	//printf("The value of the integer is %d\n", yylval);
+	yylval = atoi(yytext); return T_Int;
 }
 
 {FLOATING_POINT} {
@@ -53,6 +56,7 @@ username {
 
 int yywrap();
 
+/*
 int main() {
 	yylex();
 
@@ -62,6 +66,7 @@ int main() {
 	return 0;
 
 }
+*/
 
 int yywrap() {
 	return 1;
