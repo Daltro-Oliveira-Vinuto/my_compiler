@@ -12,7 +12,14 @@
 
 %}
 
+
+
 %token T_Int
+
+%left "-"
+%left "+"
+%left "/"
+%left "*"
 
 %%
 S : S E '\n' { 
