@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "parser.tab.h"
+#include "../build/parser.tab.h"
 
 void yyerror(const char *s) {
 	fprintf(stderr, "Error while parsing: %s\n", s);

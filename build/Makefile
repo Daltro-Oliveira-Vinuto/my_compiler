@@ -5,15 +5,17 @@ rule_bison: bison preprocess_compile_and_assemble_bison
 rule_main: preprocess_compile_and_assemble_main
 load: load_elf
 
-SRC_MAIN := main.c
+SRC_MAIN := ../src/main.c
 OBJECT_MAIN := main.o
-SRC_FLEX := scanner.l
+FLEX_FILENAME = scanner.l 
+SRC_FLEX := ../src/$(FLEX_FILENAME)
 FLEX_OUTPUT := lex.yy.c
-OBJECT_FLEX := lex.yy.o 
-SRC_BISON := parser
+OBJECT_FLEX := lex.yy.o
+BISON_FILENAME := parser
+SRC_BISON := ../src/$(BISON_FILENAME)
 BISON_TYPE := .y
-BISON_OUTPUT := $(SRC_BISON).tab.c
-OBJECT_BISON := $(SRC_BISON).tab.o
+BISON_OUTPUT := $(BISON_FILENAME).tab.c
+OBJECT_BISON := $(BISON_FILENAME).tab.o
 ELF := compiler.elf
 INPUT_COMPILER_CODE := my_code.code
 
