@@ -6,7 +6,8 @@ void yyerror(const char *s) {
 }
 
 int main() {
-
+	printf("Starting the compiling process...\n\n");
+	
 	// obs.: yyparse WILL call call yylex
 	if (yyparse() == 0) {
 		printf("Parse sucessfull\n");

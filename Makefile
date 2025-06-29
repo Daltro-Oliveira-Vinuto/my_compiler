@@ -1,3 +1,4 @@
+go: all load 
 all: rule_bison rule_flex rule_main link_flex_bison_and_main
 rule_flex:  clear flex preprocess_compile_and_assemble_flex
 rule_bison: bison preprocess_compile_and_assemble_bison
@@ -14,6 +15,7 @@ BISON_TYPE := .y
 BISON_OUTPUT := $(SRC_BISON).tab.c
 OBJECT_BISON := $(SRC_BISON).tab.o
 ELF := compiler.elf
+INPUT_COMPILER_CODE := my_code.code
 
 # BEGIN Flex section ====================================================
 flex:
@@ -49,7 +51,7 @@ link_flex_bison_and_main:
 	gcc $(OBJECT_FLEX) $(OBJECT_BISON) $(OBJECT_MAIN)  -o $(ELF)
 
 load_elf:
-	./${ELF}
+	./${ELF} < $(INPUT_COMPILER_CODE)
 
 clear:
 	clear
