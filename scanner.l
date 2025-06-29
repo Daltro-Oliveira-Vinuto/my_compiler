@@ -10,8 +10,15 @@ extern YYSTYPE yylval;
 
 %%
 
-[0-9]+ {yylval = atoi(yytext); return T_Int;}
-[-+*/\n] { return yytext[0];}
+[0-9]+ {
+	yylval = atoi(yytext); 
+	printf("--------> token integer: %d found ---------\n", yylval);
+	return T_Int;
+}
+
+[-+*/\n] { 
+	return yytext[0];
+}
 
 . { /* ignore everything else */ }
 

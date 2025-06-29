@@ -1,6 +1,6 @@
 go: all load 
-all: rule_bison rule_flex rule_main link_flex_bison_and_main
-rule_flex:  clear flex preprocess_compile_and_assemble_flex
+all: clear rule_bison rule_flex rule_main link_flex_bison_and_main
+rule_flex:  flex preprocess_compile_and_assemble_flex
 rule_bison: bison preprocess_compile_and_assemble_bison
 rule_main: preprocess_compile_and_assemble_main
 load: load_elf
