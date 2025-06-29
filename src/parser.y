@@ -1,74 +1,143 @@
 %{
- #include <stdio.h>
- #include <assert.h>
+#include <stdio.h>
+#include "../include/CODE.H"
 
- extern int yylex(void);
- extern void yyerror(const char*);
- #define YYDEBUG 1
+//#define YYDEBUG 1
+extern int yylex(void);
+extern void yyerror(const char *);
 
- static int Pop();
- static int Top();
- static void Push(int val);
+extern FILE *yyin;
+extern FILE *yyout;
+
+/* TM location number for current instruction emission */
+static int emitLoc = 0 ;
+
+/* Highest TM location emitted so far
+   For use in conjunction with emitSkip,
+   emitBackup, and emitRestore */
+static int highEmitLoc = 0;
 
 %}
 
+%union{
+	int inteiro;
+}
 
-
-%token T_Int
-
-%left "-"
-%left "+"
-%left "/"
-%left "*"
+%token ESCREVA
+%token <inteiro> NUM
 
 %%
-S : S E '\n' { 
-	printf("= %d\n", Top());
-	$$ = $2;
-	printf("TOP $$, $1, $2: %d, %d, %d\n", $$, $1, $2);
- }
- |
- ;
-E : E E '+' { 
-	Push(Pop() + Pop()); 
-	$$ = $1 + $2;
-	printf("====> values $$, $1, $2: %d, %d, %d\n", $$, $1, $2);
 
-}
- | E E '-' { 
- 	int op2 = Pop(); Push(Pop() - op2); 
- }
- | E E '*' { 
- 	Push(Pop() * Pop()); 
- }
- | E E '/' { 
- 	int op2 = Pop(); Push(Pop() / op2);
- 	 }
- | T_Int { 
- 	printf("T_Int found: %d\n", yylval); Push(yylval); 
- 	$$ = $1;
- 	printf("====> value of $$, $1: %d, %d\n", $$, $1);
+programa:	'{' lista_cmds '}'
+	{
+		printf("\nPrograma sintaticamente correto.\n");
+	}
+;
+lista_cmds:	cmd ';'				{;}
+		| cmd ';' lista_cmds		{;}
+;
+cmd:		cmd_saida			{;}
+;
+cmd_saida:	ESCREVA '(' exp ')'
+	{
+		/* generate code for expression to write */
+//		cGen(tree->child[0]);
+		/* now output it */
+		emitRO("OUT",ac,0,0,"write ac");
 
- }
- ;
+	}
+;
+exp:		NUM
+	{
+		emitRM("LDC",ac,$1,0,"load const");
+	}
+;
 %%
-
-static int stack[100], count = 0;
-static int Pop() {
- assert(count > 0);
- return stack[--count];
-}
-static int Top() {
- assert(count > 0);
- return stack[count-1];
-}
-static void Push(int val) {
- assert(count < sizeof(stack)/sizeof(*stack));
- stack[count++] = val;
-}
 
 /*
-int main() {
- return yyparse();
-}
+void emitRO( char *op, int r, int s, int t, char *c)
+{ fprintf(yyout,"%3d:  %5s  %d,%d,%d ",emitLoc++,op,r,s,t);
+//  if (TraceCode) fprintf(code,"\t%s",c) ;
+  fprintf(yyout,"\n") ;
+//  if (highEmitLoc < emitLoc) highEmitLoc = emitLoc ;
+} /* emitRO */
+
+/* Procedure emitRM emits a register-to-memory
+ * TM instruction
+ * op = the opcode
+ * r = target register
+ * d = the offset
+ * s = the base register
+ * c = a comment to be printed if TraceCode is TRUE
+ */
+
+/*
+void emitRM( char * op, int r, int d, int s, char *c)
+{ fprintf(yyout,"%3d:  %5s  %d,%d(%d) ",emitLoc++,op,r,d,s);
+//  if (TraceCode) fprintf(code,"\t%s",c) ;
+  fprintf(yyout,"\n") ;
+//  if (highEmitLoc < emitLoc)  highEmitLoc = emitLoc ;
+} /* emitRM */
+
+/* 
 */
+
+
+extern int yydebug;
+
+void emitRO( char *op, int r, int s, int t, char *c)
+{ fprintf(yyout,"%3d:  %5s  %d,%d,%d ",emitLoc++,op,r,s,t);
+//  if (TraceCode) fprintf(code,"\t%s",c) ;
+  fprintf(yyout,"\n") ;
+//  if (highEmitLoc < emitLoc) highEmitLoc = emitLoc ;
+} /* emitRO */
+
+/* Procedure emitRM emits a register-to-memory
+ * TM instruction
+ * op = the opcode
+ * r = target register
+ * d = the offset
+ * s = the base register
+ * c = a comment to be printed if TraceCode is TRUE
+ */
+void emitRM( char * op, int r, int d, int s, char *c)
+{ fprintf(yyout,"%3d:  %5s  %d,%d(%d) ",emitLoc++,op,r,d,s);
+//  if (TraceCode) fprintf(code,"\t%s",c) ;
+  fprintf(yyout,"\n") ;
+//  if (highEmitLoc < emitLoc)  highEmitLoc = emitLoc ;
+} /* emitRM */
+
+int main(int argc,char  **argv) {
+//	extern int yydebug;
+//	yydebug=1;
+
+	++argv; --argc; 	    /* abre arquivo de entrada se houver */
+	if(argc > 0)
+		yyin = fopen(argv[0],"rt");
+	else
+		yyin = stdin;    /* cria arquivo de saida se especificado */
+	if(argc > 1)
+		yyout = fopen(argv[1],"wt");
+	else
+		yyout = stdout;
+
+//emitComment("Standard prelude:");
+emitRM("LD",mp,0,ac,"load maxaddress from location 0");
+emitRM("ST",ac,0,ac,"clear location 0");
+//emitComment("End of standard prelude.");
+
+	yyparse ();
+
+//emitComment("End of execution.");
+emitRO("HALT",0,0,0,"");
+
+	fclose(yyin);
+	fclose(yyout);
+
+	return 0;
+}
+
+void yyerror (const char *s) /* Called by yyparse on error */ {
+
+	printf ("Problema com a analise sintatica!: %s\n", s);
+}

@@ -3,30 +3,18 @@
 #include <stdio.h>
 #include <stdio.h>
 #include "../build/parser.tab.h"
-extern YYSTYPE yylval;
 
 %}
 
-
 %%
 
-[0-9]+ {
-	yylval = atoi(yytext); 
-	printf("--------> token integer: %d found ---------\n", yylval);
-	return T_Int;
-}
-
-[-+*/\n] { 
-	return yytext[0];
-}
-
-. { /* ignore everything else */ }
+escreva		{return ESCREVA;}
+[0-9]+		{yylval.inteiro = atoi(yytext); return NUM;}
+[ \t\n]+	{;}
+.		{return yytext[0];}
 
 %%
-
-int yywrap();
-
 
 int yywrap() {
-	return 1;
+  return 1;
 }
